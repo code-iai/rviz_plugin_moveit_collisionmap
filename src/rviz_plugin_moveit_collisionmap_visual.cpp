@@ -23,7 +23,7 @@ namespace rviz_plugin_moveit_collisionmap {
   void MoveItCollisionMapVisual::setMessage(const moveit_msgs::CollisionMap::ConstPtr& msg) {
     vector<moveit_msgs::OrientedBoundingBox> vecBoxes = msg->boxes;
     
-    for(vector<moveit_msgs::OrientedBoundingBox>::iterator itBox = vecBoxes.begin();
+    /*for(vector<moveit_msgs::OrientedBoundingBox>::iterator itBox = vecBoxes.begin();
     	itBox != vecBoxes.end();
     	itBox++) {
       moveit_msgs::OrientedBoundingBox bxBox = *itBox;
@@ -35,7 +35,7 @@ namespace rviz_plugin_moveit_collisionmap {
       
       cube_->setPosition(vecPosition);
       cube_->setScale(vecExtents);
-    }
+      }*/
     
     // // Convert the geometry_msgs::Vector3 to an Ogre::Vector3.
     // Ogre::Vector3 acc(a.x, a.y, a.z);
@@ -51,14 +51,15 @@ namespace rviz_plugin_moveit_collisionmap {
     // // acceleration vector.
     // acceleration_arrow_->setDirection(acc);
   }
-
+  
   // Position and orientation are passed through to the SceneNode.
   void MoveItCollisionMapVisual::setFramePosition(const Ogre::Vector3& position) {
     frame_node_->setPosition(position);
   }
   
   void MoveItCollisionMapVisual::setExtents(const Ogre::Vector3& extents) {
-    frame_node_->setScale(extents);
+    //frame_node_->setScale(extents);
+    cube_->setScale(extents);
   }
   
   // Color is passed through to the Arrow object.

@@ -24,7 +24,7 @@ namespace rviz_plugin_moveit_collisionmap {
 					      "0 is fully transparent, 1.0 is fully opaque.",
 					      this, SLOT(updateColorAndAlpha()));
     
-    history_length_property_ = new rviz::IntProperty("History Length", 500,
+    history_length_property_ = new rviz::IntProperty("History Length", 5000,
 						     "Number of cubes to display at the same time.",
 						     this, SLOT(updateHistoryLength()));
     history_length_property_->setMin(1);
@@ -50,17 +50,16 @@ namespace rviz_plugin_moveit_collisionmap {
     float alpha = alpha_property_->getFloat();
     Ogre::ColourValue color = color_property_->getOgreColor();
 
-    for( size_t i = 0; i < visuals_.size(); i++ )
-      {
-	visuals_[ i ]->setColor( color.r, color.g, color.b, alpha );
-      }
+    for(size_t i = 0; i < visuals_.size(); i++) {
+      visuals_[i]->setColor(color.r, color.g, color.b, alpha);
+    }
   }
-
+  
   // Set the number of past visuals to show.
   void MoveItCollisionMapDisplay::updateHistoryLength() {
     visuals_.rset_capacity(history_length_property_->getInt());
   }
-
+  
   // This is our callback to handle an incoming message.
   void MoveItCollisionMapDisplay::processMessage(const moveit_msgs::CollisionMap::ConstPtr& msg) {
     // Here we call the rviz::FrameManager to get the transform from the
@@ -79,25 +78,42 @@ namespace rviz_plugin_moveit_collisionmap {
     // We are keeping a circular buffer of visual pointers. This gets
     // the next one, or creates and stores it if the buffer is not full
     boost::shared_ptr<MoveItCollisionMapVisual> visual;
-    if(visuals_.full()) {
-      visual = visuals_.front();
-    } else {
-      visual.reset(new MoveItCollisionMapVisual(context_->getSceneManager(), scene_node_));
+    
+    vector<moveit_msgs::OrientedBoundingBox> vecBoxes = msg->boxes;
+    for(vector<moveit_msgs::OrientedBoundingBox>::iterator itBox = vecBoxes.begin();
+    	itBox != vecBoxes.end();
+    	itBox++) {
+      moveit_msgs::OrientedBoundingBox bxBox = *itBox;
+      const geometry_msgs::Point& ptPosition = bxBox.pose.position;
+      const geometry_msgs::Point32& ptExtents = bxBox.extents;
+      
+      Ogre::Vector3 vecPosition(ptPosition.x, ptPosition.y, ptPosition.z);
+      Ogre::Vector3 vecExtents(ptExtents.x - 0.01, ptExtents.y - 0.01, ptExtents.z - 0.01);
+      
+      //visual->setFramePosition(vecPosition);
+      //cube_->setPosition(vecPosition);
+      //cube_->setScale(vecExtents);
+      
+      if(visuals_.full()) {
+	visual = visuals_.front();
+      } else {
+	visual.reset(new MoveItCollisionMapVisual(context_->getSceneManager(), scene_node_));
+      }
+      
+      // Now set or update the contents of the chosen visual.
+      visual->setMessage(msg);
+      visual->setFramePosition(vecPosition);
+      visual->setExtents(vecExtents);
+      
+      float alpha = alpha_property_->getFloat();
+      Ogre::ColourValue color = color_property_->getOgreColor();
+      visual->setColor(color.r, color.g, color.b, alpha);
+      
+      // And send it to the end of the circular buffer
+      
+      // NOTE(winkler): Check here if this cube is already in the buffer.
+      visuals_.push_back(visual);
     }
-    
-    // // Now set or update the contents of the chosen visual.
-    visual->setMessage(msg);
-    visual->setFramePosition(position);
-    //visual->setFrameOrientation(orientation);
-    
-    float alpha = alpha_property_->getFloat();
-    Ogre::ColourValue color = color_property_->getOgreColor();
-    visual->setColor(color.r, color.g, color.b, alpha);
-    
-    // And send it to the end of the circular buffer
-    
-    // NOTE(winkler): Check here if this cube is already in the buffer.
-    visuals_.push_back(visual);
   }
 }
 
