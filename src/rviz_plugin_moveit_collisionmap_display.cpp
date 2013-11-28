@@ -77,6 +77,7 @@ namespace rviz_plugin_moveit_collisionmap {
     
     // We are keeping a circular buffer of visual pointers. This gets
     // the next one, or creates and stores it if the buffer is not full
+    visuals_.clear();
     boost::shared_ptr<MoveItCollisionMapVisual> visual;
     
     vector<moveit_msgs::OrientedBoundingBox> vecBoxes = msg->boxes;
