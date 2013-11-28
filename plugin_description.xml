@@ -1,0 +1,9 @@
+<library path="librviz_plugin_moveit_collisionmap">
+  <class name="rviz_plugin_moveit_collisionmap/MoveItCollisionMap"
+         type="rviz_plugin_moveit_collisionmap::MoveItCollisionMapDisplay"
+         base_class_type="rviz::Display">
+    <description>
+      CollisionMap from MoveIt!
+    </description>
+  </class>
+</library>
